@@ -12,9 +12,9 @@ Setup a Python virtualenv (using
 and ``pip install`` requirements:
 
 ``` bash
-    $ mkvirtualenv index
-    $ workon index
-    $ pip install -r requirements.txt
+$ mkvirtualenv index
+$ workon index
+$ pip install -r requirements.txt
 ```
 
 Install NLTK requirements:
@@ -36,5 +36,5 @@ step or an ingredient. It’s also almost always wrong because there isn’t rea
 much training data and I don’t really know what I’m doing. Yet.
 
 ``` bash
-    $ python indexer.py base_layers carnitas
+$ python indexer.py base_layers carnitas
 ```
