@@ -38,21 +38,24 @@ training = {
     ]
 }
 
+def prepare_input(sentence):
+    words = []
+    sentences = nltk.sent_tokenize(sentence)
+    for sent in sentences:
+        words = words + nltk.word_tokenize(sent)
+    pos = nltk.pos_tag(words)
+    pos = [simplify_wsj_tag(tag) for word, tag in pos]
+    words = [w.lower() for w in words]
+    trigrams = nltk.trigrams(words)
+    trigrams = ['%s/%s/%s' % (i[0], i[1], i[2]) for i in trigrams]
+    features = words + pos + trigrams
+    features = dict((f, True) for f in features)
+    return features
+
 def train():
     for k,v in training.items():
         for sentence in v:
-            words = []
-            sentences = nltk.sent_tokenize(sentence)
-            for sent in sentences:
-                words = words + nltk.word_tokenize(sent)
-            pos = nltk.pos_tag(words)
-            pos = [simplify_wsj_tag(tag) for word, tag in pos]
-            words = [w.lower() for w in words]
-            trigrams = nltk.trigrams(words)
-            trigrams = ['%s/%s/%s' % (i[0], i[1], i[2]) for i in trigrams]
-            features = words + pos + trigrams
-            features = dict((f, True) for f in features)
-            yield (features, k)
+            yield (prepare_input(sentence), k)
 
 if __name__ == '__main__':
     import sys
@@ -60,7 +63,13 @@ if __name__ == '__main__':
     for features in train():
         training_set.append(features)
     classifier = MaxentClassifier.train(training_set)
-    print classifier.classify({sys.argv[1]: True})
+    layer_type, slug = sys.argv[1:3]
+    r = requests.get('http://randomtaco.me/%s/%s/' % (layer_type, slug))
+    recipe = r.json()['recipe']
+    recipe_sentences = nltk.sent_tokenize(recipe)
+    for sent in recipe_sentences:
+        print classifier.classify(prepare_input(sent))
+        print '*'*80
 
 
 
